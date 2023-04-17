@@ -1,0 +1,14 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://containers-us-west-173.railway.app:6583/railway
+    username: root
+    password: o9iP4gGHDl6l2A5US3Kz
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate.format_sql: true
+  servlet:
+    multipart:
+      max-file-size: 3MB
