@@ -1,3 +1,5 @@
+host:
+  name: ${HOST_NAME:https://be-ksante.up.railway.app/}
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
