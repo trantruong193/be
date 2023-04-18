@@ -33,4 +33,6 @@ public class Student implements Serializable {
     private String avatar;
     @Column(name = "hobbies")
     private String hobbies;
+    @Column(name = "status")
+    private boolean status;
 }

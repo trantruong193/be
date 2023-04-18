@@ -3,10 +3,14 @@ package com.shopme.be.auth;
 import com.shopme.be.config.JwtService;
 import com.shopme.be.persistant.model.User;
 import com.shopme.be.service.UserService;
+import com.shopme.be.user.MyUserDetail;
+import com.shopme.be.user.MyUserDetailService;
 import com.shopme.be.user.Role;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -39,21 +43,17 @@ public class AuthService {
                 .password(passwordEncoder.encode(request.getPassword()))
                 .build();
         userService.save(user);
-        var jwtToken = jwtService.generateToken(request.getEmail());
 
+        var jwtToken = jwtService.generateToken(request.getEmail());
         return Authentication.builder()
                 .token(jwtToken).build();
     }
 
     public Authentication authenticate(AuthRequest request) {
-
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getEmail(),request.getPassword())
         );
-
-        var user = userService.findByEmail(request.getEmail()).orElseThrow(null);
         var jwtToken = jwtService.generateToken(request.getEmail());
-
         return Authentication.builder()
                 .token(jwtToken).build();
     }

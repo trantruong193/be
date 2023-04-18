@@ -1,14 +1,36 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://containers-us-west-4.railway.app:6398/railway
-    username: root
-    password: pW7Wym4sa5gfZOjJboBG
+    url: jdbc:mysql://${MYSQL_SERVER}:${MYSQL_PORT}/${MYSQL_DTB}
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: update
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
     properties:
-      hibernate.format_sql: true
-  servlet:
-    multipart:
-      max-file-size: 3MB
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQL5Dialect
+        globally_quoted_identifiers: true
+jwt:
+  secret: ${SECRET_KEY:576D5A7134743777397A24432646294A404E635266556A586E3272357538782F}
+  expires: ${JWT_EXPIRES:1800000}
+error:
+  errorMessage:
+    ERROR_01:
+      err_vn: Email has been used !!
+      err_us: Email đã được sử dụng !!
+    ERROR_02:
+      err_vn: Email or password is invalid !!
+      err_us: Tài khoản hoặc mật khẩu không hợp lệ !!
+    ERROR_03:
+      err_vn: Information is invalid !!
+      err_us: Thông tin quý khách cung cấp không hợp lệ !!
+    ERROR_500:
+      err_vn: Server caught error, try later !!
+      err_us: Server gặp lỗi, thử lại sau !!
+    ERROR_401:
+      err_vn: Access denied !!
+      err_us: Truy cập không hợp lệ !!

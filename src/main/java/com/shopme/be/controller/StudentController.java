@@ -24,73 +24,43 @@ public class StudentController {
     }
 
     @GetMapping()
-    ResponseEntity<ResponseObject> getAll(@PageableDefault(size = 3) Pageable pageable){
+    ResponseEntity<ResponseObject> getAllByPage(@PageableDefault(size = 3) Pageable pageable){
 
         Page<StudentDto> students = studentService.getAll(pageable);
         return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(new ResponseObject("Ok","Get All students successfully",students));
+            .status(HttpStatus.OK)
+            .body(new ResponseObject("Ok","Get all students successfully",students));
 
     }
     @GetMapping("/{id}")
-    ResponseEntity<ResponseObject> getById(@PathVariable String id){
+    ResponseEntity<ResponseObject> getById(@PathVariable Long id){
 
-        StudentDto studentDto = studentService.getById(Long.valueOf(id));
-
-        if (studentDto != null){
-            return ResponseEntity
-                    .status(HttpStatus.OK)
-                    .body(new ResponseObject("Ok","Details of student with ID: " + id,studentDto));
-        }else {
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body(new ResponseObject("Not Found","No Detail of student with ID: " + id,""));
-        }
+        StudentDto studentDto = studentService.findById(id);
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(new ResponseObject("Ok","Details of student with ID: " + id,studentDto));
     }
     @PostMapping()
     ResponseEntity<ResponseObject> save(@RequestBody StudentDto studentDto){
 
-        StudentDto student = studentService.saveStudent(studentDto);
-        if (student!=null){
-            return ResponseEntity
-                    .status(HttpStatus.OK)
-                    .body(new ResponseObject("Insert Ok","Insert student successfully",student));
-        }else {
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body(new ResponseObject("Insert fail","Insert student fail",""));
-        }
+        StudentDto student = studentService.add(studentDto);
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(new ResponseObject("Insert Ok","Insert student successfully",student));
     }
     @DeleteMapping("/{id}")
-    ResponseEntity<ResponseObject> deleteBy(@PathVariable String id){
-
-        boolean delete = studentService.deleteStudent(Long.valueOf(id));
-
-        if (delete){
-            return ResponseEntity
-                    .status(HttpStatus.OK)
-                    .body(new ResponseObject("Delete Ok","Delete success student with ID: " + id,""));
-        }else {
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body(new ResponseObject("Delete fail","Can't delete student with ID: " + id,""));
-        }
+    ResponseEntity<ResponseObject> delete(@PathVariable Long id){
+        studentService.remove(id);
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(new ResponseObject("Delete Ok","Delete success student with ID: " + id,""));
     }
     @PutMapping("")
     ResponseEntity<ResponseObject> update(@RequestBody StudentDto studentDto){
-
-        StudentDto studentDto1 = studentService.updateStudent(studentDto);
-
-
-        if (studentDto1 != null){
-            return ResponseEntity
-                    .status(HttpStatus.OK)
-                    .body(new ResponseObject("Update Ok","Update success fully",studentDto1));
-        }else {
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body(new ResponseObject("Update fail","Can't update student",""));
-        }
+        StudentDto saved = studentService.update(studentDto);
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(new ResponseObject("Update Ok","Update success fully",saved));
     }
 
 }

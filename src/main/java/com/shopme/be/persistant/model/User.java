@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -22,41 +21,48 @@ import java.util.Date;
 public class User implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
 
-    @Column(length = 50,nullable = false)
+    @Column(name = "firstname",length = 50,nullable = false)
     private String firstname;
 
-    @Column(length = 50,nullable = false)
+    @Column(name = "lastname",length = 50,nullable = false)
     private String lastname;
 
-    @Column(length = 100,nullable = false,unique = true)
+    @Column(name = "email",length = 100,nullable = false,unique = true,updatable = false)
     private String email;
 
-    @Column(length = 100)
+    @Column(name = "nickname",length = 100)
     private String nickname;
 
-    @Column(length = 100,nullable = false)
+    @Column(name = "password",length = 100,nullable = false)
     private String password;
 
     @CreationTimestamp
-    private Date createAt;
+    @Column(name = "create_at")
+    private Date createdAt;
 
     @UpdateTimestamp
+    @Column(name = "updated_at")
     private Date updatedAt;
 
+    @Column(name = "address")
     private String address;
 
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @Column(name = "birthday")
     private Date birthday;
 
+    @Column(name = "gender")
     private String gender;
 
+    @Column(name = "avatar")
     private String avatar;
 
+    @Column(name = "tick")
     private boolean tick;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "role")
     private Role role;
-
 }

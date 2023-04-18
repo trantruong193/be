@@ -2,6 +2,7 @@ package com.shopme.be.service.impl;
 
 import com.shopme.be.service.FileStorageService;
 import org.apache.commons.io.FilenameUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Arrays;
 import java.util.UUID;
 
 @Service
@@ -25,10 +27,14 @@ public class FileStorageServiceImpl implements FileStorageService {
         try {
             Files.createDirectories(storageFolder);
         }catch (IOException ioException){
-            throw new RuntimeException("Cannot initialize storage"+ioException);
+            throw new RuntimeException("Cannot initialize storage folder" + ioException.getMessage());
         }
     }
-
+    private boolean isImageFile(MultipartFile file){
+        String fileExtension = FilenameUtils.getExtension(file.getOriginalFilename());
+        return Arrays.asList(new String[] {"png","jpg","jpeg","bmp"})
+                .contains(fileExtension.trim().toLowerCase());
+    }
     @Override
     public String storageFile(MultipartFile file) {
         try {
@@ -40,6 +46,10 @@ public class FileStorageServiceImpl implements FileStorageService {
             float fileSizeInMb = file.getSize()/1_000_000.0f;
             if (fileSizeInMb>3.0f){
                 throw new RuntimeException("Storage file is over than 3Mb");
+            }
+            // check if not image file
+            if(!isImageFile(file)){
+                throw new RuntimeException("You can only upload image file");
             }
             // Creat new file
             String filenameExtension = FilenameUtils.getExtension(file.getOriginalFilename());
@@ -53,7 +63,7 @@ public class FileStorageServiceImpl implements FileStorageService {
             return generatedFilename;
 
         }catch (Exception e){
-            throw new RuntimeException("Can't store file",e);
+            throw new RuntimeException("Can't store file: " + e.getMessage());
         }
     }
 
@@ -66,10 +76,10 @@ public class FileStorageServiceImpl implements FileStorageService {
                 byte[] bytes = StreamUtils.copyToByteArray(resource.getInputStream());
                 return bytes;
             }else {
-                throw new RuntimeException("Could not read file" + fileName);
+                throw new RuntimeException("File is not existed");
             }
-        } catch (IOException e) {
-            throw new RuntimeException("Could not read file" + fileName,e);
+        } catch (Exception e) {
+            throw new RuntimeException("Could not read file: " + fileName + ". " + e.getMessage());
         }
     }
 }
