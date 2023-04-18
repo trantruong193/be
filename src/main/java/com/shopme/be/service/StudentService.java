@@ -7,12 +7,8 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
-public interface StudentService {
+public interface StudentService extends BaseService<StudentDto>{
     Page<StudentDto> getAll(Pageable pageable);
-    StudentDto getById(Long id);
     StudentDto getByEmail(String email);
-    boolean deleteStudent(Long id);
-    StudentDto saveStudent(StudentDto student);
-    StudentDto updateStudent(StudentDto student);
 
 }
