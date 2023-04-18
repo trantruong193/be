@@ -18,10 +18,17 @@ import org.springframework.web.multipart.MultipartFile;
 public class FileUploadController {
     private final FileStorageService fileStorageService;
 
+    @Value("${host.name}")
+    private String hostName;
+    public void setHostName(String hostName) {
+        this.hostName = hostName;
+    }
+
     @PostMapping("")
     public ResponseEntity<ResponseObject> upload (@RequestParam("file") MultipartFile file){
+        System.out.println(hostName);
         try {
-            StringBuffer servername = new StringBuffer("https://be-ksante.up.railway.app/api/v1/files/");
+            StringBuffer servername = new StringBuffer(hostName + "/api/v1/files/");
             String generateFilename = fileStorageService.storageFile(file);
             return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("Ok","store success",servername + generateFilename));
         }catch (Exception e){

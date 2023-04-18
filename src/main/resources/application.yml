@@ -1,5 +1,5 @@
 host:
-  name: ${HOST_NAME:https://be-ksante.up.railway.app/}
+  name: ${HOST_NAME:https://be-ksante.up.railway.app}
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -16,6 +16,9 @@ spring:
         format_sql: true
         dialect: org.hibernate.dialect.MySQL5Dialect
         globally_quoted_identifiers: true
+  servlet:
+    multipart:
+      max-file-size: 3MB
 jwt:
   secret: ${SECRET_KEY:576D5A7134743777397A24432646294A404E635266556A586E3272357538782F}
   expires: ${JWT_EXPIRES:1800000}

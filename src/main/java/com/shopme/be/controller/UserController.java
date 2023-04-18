@@ -53,7 +53,6 @@ public class UserController {
         if (!(authentication instanceof AnonymousAuthenticationToken)) {
             MyUserDetail myUserDetail = (MyUserDetail) authentication.getPrincipal();
             String email = myUserDetail.getUsername();
-            System.out.println(email);
             return !Objects.equals(email, dto.getEmail());
         }
         return false;
