@@ -39,3 +39,6 @@ error:
     ERROR_401:
       err_vn: Access denied !!
       err_us: Truy cập không hợp lệ !!
+springdoc:
+  api-docs:
+    path: api-docs

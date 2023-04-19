@@ -2,6 +2,7 @@ package com.shopme.be.controller;
 
 import com.shopme.be.persistant.dto.ResponseObject;
 import com.shopme.be.service.FileStorageService;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -23,10 +24,9 @@ public class FileUploadController {
     public void setHostName(String hostName) {
         this.hostName = hostName;
     }
-
+    @Operation(summary = "Upload an image")
     @PostMapping("")
     public ResponseEntity<ResponseObject> upload (@RequestParam("file") MultipartFile file){
-        System.out.println(hostName);
         try {
             StringBuffer servername = new StringBuffer(hostName + "/api/v1/files/");
             String generateFilename = fileStorageService.storageFile(file);
@@ -35,6 +35,7 @@ public class FileUploadController {
             return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new ResponseObject("False","Store fail",e.getMessage()));
         }
     }
+    @Operation(summary = "Get an image")
     @GetMapping("/{fileName:.+}")
     public ResponseEntity<?> readDetailFile(@PathVariable String fileName){
         try {
