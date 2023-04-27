@@ -11,6 +11,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+
 @RestController
 @CrossOrigin
 @RequestMapping("api/v1/students")
@@ -24,21 +27,14 @@ public class StudentController {
     }
 
     @GetMapping()
-    ResponseEntity<ResponseObject> getAllByPage(@PageableDefault(size = 3) Pageable pageable){
-
-        Page<StudentDto> students = studentService.getAll(pageable);
-        return ResponseEntity
-            .status(HttpStatus.OK)
-            .body(new ResponseObject("Ok","Get all students successfully",students));
-
+    ResponseEntity<ResponseObject> getAllByPage(@PageableDefault(size = 10) Pageable pageable) throws ExecutionException, InterruptedException {
+        CompletableFuture<Page<StudentDto>> students = studentService.getAll(pageable);
+        return ResponseEntity.status(200).body(new ResponseObject("Ok","Get students success",students.get()));
     }
-    @GetMapping("/{id}")
-    ResponseEntity<ResponseObject> getById(@PathVariable Long id){
-
-        StudentDto studentDto = studentService.findById(id);
-        return ResponseEntity
-            .status(HttpStatus.OK)
-            .body(new ResponseObject("Ok","Details of student with ID: " + id,studentDto));
+    @GetMapping("{id}")
+    ResponseEntity<ResponseObject> getById(@PathVariable Long id) throws InterruptedException, ExecutionException {
+        CompletableFuture<StudentDto> studentDto = studentService.findById(id);
+        return ResponseEntity.status(200).body(new ResponseObject("Ok","Student with Id: " + id,studentDto.get()));
     }
     @PostMapping()
     ResponseEntity<ResponseObject> save(@RequestBody StudentDto studentDto){
@@ -48,7 +44,7 @@ public class StudentController {
             .status(HttpStatus.OK)
             .body(new ResponseObject("Insert Ok","Insert student successfully",student));
     }
-    @DeleteMapping("/{id}")
+    @DeleteMapping("{id}")
     ResponseEntity<ResponseObject> delete(@PathVariable Long id){
         studentService.remove(id);
         return ResponseEntity

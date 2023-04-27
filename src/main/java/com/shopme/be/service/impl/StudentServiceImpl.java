@@ -8,17 +8,21 @@ import com.shopme.be.persistant.model.Student;
 import com.shopme.be.repository.StudentRepository;
 import com.shopme.be.service.StudentService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class StudentServiceImpl implements StudentService {
     private final StudentRepository studentRepository;
 
@@ -45,6 +49,7 @@ public class StudentServiceImpl implements StudentService {
                 newStudent.setHobbies(Arrays.toString(studentDto.getHobbies()));
 
             Student saved = studentRepository.save(newStudent);
+            log.info("Create new student {}", newStudent);
             return StudentMapper.toDto(saved);
 
         }catch (Exception e){
@@ -63,12 +68,16 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    public StudentDto findById(Long id) {
+    @Async
+    public CompletableFuture<StudentDto> findById(Long id) {
+        long start = System.currentTimeMillis();
         Optional<Student> student = studentRepository.findById(id);
         if (student.isEmpty()){
             throw new MyException(ErrorCode.INVALID_INFORMATION);
         }
-        return StudentMapper.toDto(student.get());
+        long end = System.currentTimeMillis();
+        log.info(String.format("%1$s Get students detail in %2$s ms",Thread.currentThread().getName(),end-start));
+        return CompletableFuture.completedFuture(StudentMapper.toDto(student.get()));
     }
 
     @Override
@@ -98,6 +107,7 @@ public class StudentServiceImpl implements StudentService {
 
         try {
             Student saved =  studentRepository.save(found);
+            log.info("Update student {}",saved);
             return StudentMapper.toDto(saved);
         }catch (Exception e){
             throw new MyException(ErrorCode.SERVER_ERROR);
@@ -116,9 +126,13 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    public Page<StudentDto> getAll(Pageable pageable) {
+    @Async
+    public CompletableFuture<Page<StudentDto>> getAll(Pageable pageable) {
+        long start = System.currentTimeMillis();
         Page<Student> students = studentRepository.findAll(pageable);
-        return students.map(StudentMapper::toDto);
+        long end = System.currentTimeMillis();
+        log.info(String.format("%1$s Get all students in %2$s ms",Thread.currentThread().getName(),end-start));
+        return CompletableFuture.completedFuture(students.map(StudentMapper::toDto));
     }
     @Override
     public StudentDto getByEmail(String email) {
