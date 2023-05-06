@@ -1,7 +1,7 @@
 package com.shopme.be.config;
 
 import com.shopme.be.user.MyUserDetailService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -18,18 +18,11 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
-
+@RequiredArgsConstructor
 public class SecurityConfig {
 
     private final MyUserDetailService myUserDetailService;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-
-    @Autowired
-    public SecurityConfig(MyUserDetailService myUserDetailService,
-                          JwtAuthenticationFilter jwtAuthenticationFilter){
-        this.myUserDetailService = myUserDetailService;
-        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
-    }
 
     @Bean
     public PasswordEncoder passwordEncoder(){
@@ -56,6 +49,7 @@ public class SecurityConfig {
             .authorizeHttpRequests()
             .antMatchers("/api/v1/users/**").authenticated()
             .antMatchers("/api/v1/files/**").authenticated()
+            .antMatchers("/api/v1/admin/**").hasRole("ADMIN")
             .anyRequest().permitAll()
             .and()
             .sessionManagement()

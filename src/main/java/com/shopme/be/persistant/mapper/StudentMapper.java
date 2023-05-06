@@ -1,5 +1,6 @@
 package com.shopme.be.persistant.mapper;
 
+import com.shopme.be.persistant.dto.KlassDto;
 import com.shopme.be.persistant.dto.StudentDto;
 import com.shopme.be.persistant.model.Student;
 
@@ -15,7 +16,9 @@ public class StudentMapper {
         result.setBirthday(entity.getBirthday());
         result.setAvatar(entity.getAvatar());
         result.setStatus(entity.isStatus());
-
+        if (entity.getKlass() != null){
+            result.setKlass(new KlassDto(entity.getKlass().getId(),entity.getKlass().getName()));
+        }
         if (entity.getHobbies() != null){
             int length = entity.getHobbies().length();
             result.setHobbies(entity.getHobbies().substring(1,length-1).replace(" ","").split(","));

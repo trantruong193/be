@@ -8,6 +8,6 @@ import java.util.Optional;
 public interface UserService{
     UserDto findByEmail(String email);
     UserDto findById(Long id);
-    UserDto save(User userDto);
+    UserDto save(User user);
     UserDto update(UserDto userDto);
 }

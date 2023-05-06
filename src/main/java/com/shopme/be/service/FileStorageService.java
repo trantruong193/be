@@ -7,7 +7,7 @@ import java.util.concurrent.CompletableFuture;
 
 public interface FileStorageService {
 
-    CompletableFuture<String> storageFile (MultipartFile file);
+    String storageFile (MultipartFile file);
 
-    CompletableFuture<byte[]> readFileContent(String fileName);
+    byte[] readFileContent(String fileName);
 }

@@ -36,7 +36,6 @@ public class UserController {
         );
     }
 
-
     @GetMapping("{id}")
     public ResponseEntity<?> getById(@PathVariable Long id){
         // find user

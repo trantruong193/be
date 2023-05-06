@@ -1,9 +1,14 @@
 package com.shopme.be.controller;
 
+import com.shopme.be.exception.ErrorCode;
+import com.shopme.be.exception.MyException;
+import com.shopme.be.persistant.dto.KlassDto;
 import com.shopme.be.persistant.dto.ResponseObject;
 import com.shopme.be.persistant.dto.StudentDto;
+import com.shopme.be.persistant.model.Klass;
+import com.shopme.be.repository.KlassRepository;
 import com.shopme.be.service.StudentService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -11,34 +16,27 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
+import java.util.Optional;
 
 @RestController
 @CrossOrigin
 @RequestMapping("api/v1/students")
+@RequiredArgsConstructor
 public class StudentController {
-
     private final StudentService studentService;
-
-    @Autowired
-    public StudentController(StudentService studentService){
-        this.studentService = studentService;
-    }
-
+    private final KlassRepository klassRepository;
     @GetMapping()
-    ResponseEntity<ResponseObject> getAllByPage(@PageableDefault(size = 10) Pageable pageable) throws ExecutionException, InterruptedException {
-        CompletableFuture<Page<StudentDto>> students = studentService.getAll(pageable);
-        return ResponseEntity.status(200).body(new ResponseObject("Ok","Get students success",students.get()));
+    ResponseEntity<ResponseObject> getAllByPage(@PageableDefault(size = 10) Pageable pageable) {
+        Page<StudentDto> students = studentService.getAll(pageable);
+        return ResponseEntity.status(200).body(new ResponseObject("Ok","Get students success",students));
     }
     @GetMapping("{id}")
-    ResponseEntity<ResponseObject> getById(@PathVariable Long id) throws InterruptedException, ExecutionException {
-        CompletableFuture<StudentDto> studentDto = studentService.findById(id);
-        return ResponseEntity.status(200).body(new ResponseObject("Ok","Student with Id: " + id,studentDto.get()));
+    ResponseEntity<ResponseObject> getById(@PathVariable Long id){
+        StudentDto studentDto = studentService.findById(id);
+        return ResponseEntity.status(200).body(new ResponseObject("Ok","Student with Id: " + id,studentDto));
     }
     @PostMapping()
     ResponseEntity<ResponseObject> save(@RequestBody StudentDto studentDto){
-
         StudentDto student = studentService.add(studentDto);
         return ResponseEntity
             .status(HttpStatus.OK)
@@ -58,5 +56,22 @@ public class StudentController {
             .status(HttpStatus.OK)
             .body(new ResponseObject("Update Ok","Update success fully",saved));
     }
+    @PostMapping("klass")
+    ResponseEntity<ResponseObject> createKlass(@RequestBody KlassDto klassDto){
+        Optional<Klass> check = klassRepository.findKlassByName(klassDto.getName());
+        if (check.isPresent())
+            throw new MyException(ErrorCode.DUPLICATE_EMAIL);
 
+        Klass klass = new Klass();
+        klass.setName(klassDto.getName());
+
+        try {
+            klassRepository.save(klass);
+            return ResponseEntity
+                    .status(201)
+                    .body(new ResponseObject("Success","Create new class success",klassDto));
+        }catch (Exception e){
+            throw new MyException(ErrorCode.SERVER_ERROR);
+        }
+    }
 }

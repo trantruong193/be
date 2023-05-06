@@ -4,32 +4,33 @@ import com.shopme.be.exception.ErrorCode;
 import com.shopme.be.exception.MyException;
 import com.shopme.be.persistant.dto.StudentDto;
 import com.shopme.be.persistant.mapper.StudentMapper;
+import com.shopme.be.persistant.model.Klass;
 import com.shopme.be.persistant.model.Student;
+import com.shopme.be.repository.KlassRepository;
 import com.shopme.be.repository.StudentRepository;
 import com.shopme.be.service.StudentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class StudentServiceImpl implements StudentService {
     private final StudentRepository studentRepository;
-
+    private final KlassRepository klassRepository;
     @Override
     @Transactional
     public StudentDto add(StudentDto studentDto) {
         // check if email has been used
+        log.info("Start {}",Thread.currentThread().getName());
         Optional<Student> checkEmail = studentRepository.findStudentByEmail(studentDto.getEmail());
         if (checkEmail.isPresent()){
             throw new MyException(ErrorCode.DUPLICATE_EMAIL);
@@ -45,6 +46,13 @@ public class StudentServiceImpl implements StudentService {
                     .avatar(studentDto.getAvatar())
                     .status(true)
                     .build();
+            if (studentDto.getKlass().getId() != null){
+                Optional<Klass> klass = klassRepository.findById(studentDto.getKlass().getId());
+                if (klass.isEmpty()){
+                    throw new MyException(ErrorCode.INVALID_INFORMATION);
+                }
+                newStudent.setKlass(klass.get());
+            }
             if (studentDto.getHobbies() != null && studentDto.getHobbies().length != 0)
                 newStudent.setHobbies(Arrays.toString(studentDto.getHobbies()));
 
@@ -68,8 +76,7 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    @Async
-    public CompletableFuture<StudentDto> findById(Long id) {
+    public StudentDto findById(Long id) {
         long start = System.currentTimeMillis();
         Optional<Student> student = studentRepository.findById(id);
         if (student.isEmpty()){
@@ -77,7 +84,7 @@ public class StudentServiceImpl implements StudentService {
         }
         long end = System.currentTimeMillis();
         log.info(String.format("%1$s Get students detail in %2$s ms",Thread.currentThread().getName(),end-start));
-        return CompletableFuture.completedFuture(StudentMapper.toDto(student.get()));
+        return StudentMapper.toDto(student.get());
     }
 
     @Override
@@ -99,7 +106,15 @@ public class StudentServiceImpl implements StudentService {
             found.setBirthday(studentDto.getBirthday());
         if (!studentDto.getGender().isEmpty() && studentDto.getGender() != null)
             found.setGender(studentDto.getGender());
-        if (studentDto.getHobbies().length>0)
+
+        if (studentDto.getKlass().getId() != null){
+            Optional<Klass> klass = klassRepository.findById(studentDto.getKlass().getId());
+            if (klass.isEmpty()){
+                throw new MyException(ErrorCode.INVALID_INFORMATION);
+            }
+            found.setKlass(klass.get());
+        }
+        if (studentDto.getHobbies() != null && studentDto.getHobbies().length>0)
             found.setHobbies(Arrays.toString(studentDto.getHobbies()));
         if (!studentDto.getAvatar().isEmpty() && studentDto.getAvatar() != null)
             found.setAvatar(studentDto.getAvatar());
@@ -126,14 +141,14 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    @Async
-    public CompletableFuture<Page<StudentDto>> getAll(Pageable pageable) {
+    public Page<StudentDto> getAll(Pageable pageable) {
         long start = System.currentTimeMillis();
         Page<Student> students = studentRepository.findAll(pageable);
         long end = System.currentTimeMillis();
         log.info(String.format("%1$s Get all students in %2$s ms",Thread.currentThread().getName(),end-start));
-        return CompletableFuture.completedFuture(students.map(StudentMapper::toDto));
+        return students.map(StudentMapper::toDto);
     }
+
     @Override
     public StudentDto getByEmail(String email) {
         Optional<Student> student = studentRepository.findStudentByEmail(email);

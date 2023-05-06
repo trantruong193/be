@@ -1,9 +1,6 @@
 package com.shopme.be.persistant.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -35,4 +32,10 @@ public class Student implements Serializable {
     private String hobbies;
     @Column(name = "status")
     private boolean status;
+
+    @ManyToOne
+    @JoinColumn(name = "class_id")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private Klass klass;
 }

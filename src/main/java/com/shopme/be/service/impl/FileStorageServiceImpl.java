@@ -4,7 +4,6 @@ import com.shopme.be.service.FileStorageService;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,7 +16,6 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
 @Service
 public class FileStorageServiceImpl implements FileStorageService {
@@ -37,8 +35,7 @@ public class FileStorageServiceImpl implements FileStorageService {
                 .contains(fileExtension.trim().toLowerCase());
     }
     @Override
-    @Async
-    public CompletableFuture<String> storageFile(MultipartFile file) {
+    public String storageFile(MultipartFile file) {
         try {
             // Check file is empty
             if (file.isEmpty()){
@@ -62,7 +59,7 @@ public class FileStorageServiceImpl implements FileStorageService {
             InputStream inputStream = file.getInputStream();
             Files.copy(inputStream,destinationFilename, StandardCopyOption.REPLACE_EXISTING);
 
-            return CompletableFuture.completedFuture(generatedFilename);
+            return generatedFilename;
 
         }catch (Exception e){
             throw new RuntimeException("Can't store file: " + e.getMessage());
@@ -70,14 +67,13 @@ public class FileStorageServiceImpl implements FileStorageService {
     }
 
     @Override
-    @Async
-    public CompletableFuture<byte[]> readFileContent(String fileName) {
+    public byte[] readFileContent(String fileName) {
         try{
             Path file = storageFolder.resolve(fileName);
             Resource resource = new UrlResource(file.toUri());
             if (resource.exists() || resource.isReadable()){
                 byte[] bytes = StreamUtils.copyToByteArray(resource.getInputStream());
-                return CompletableFuture.completedFuture(bytes);
+                return bytes;
             }else {
                 throw new RuntimeException("File is not existed");
             }

@@ -1,6 +1,7 @@
 package com.shopme.be.persistant.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.shopme.be.persistant.model.Klass;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -27,4 +28,5 @@ public class StudentDto implements Serializable {
     private String avatar;
     private String[] hobbies;
     private boolean status;
+    private KlassDto klass;
 }

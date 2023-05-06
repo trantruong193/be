@@ -11,8 +11,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.concurrent.CompletableFuture;
-
 @Controller
 @RequestMapping("api/v1/files")
 @CrossOrigin
@@ -24,21 +22,21 @@ public class FileUploadController {
     private String hostName;
     @Operation(summary = "Upload an image")
     @PostMapping("")
-    public ResponseEntity<String> upload (@RequestParam("file") MultipartFile file){
+    public ResponseEntity<?> upload (@RequestParam("file") MultipartFile file){
+        String servername = hostName + "/api/v1/files/";
         try {
-            String servername = hostName + "/api/v1/files/";
-            CompletableFuture<String> filename = fileStorageService.storageFile(file);
-            return ResponseEntity.status(201).body(servername + filename.get());
+            String filename = fileStorageService.storageFile(file);
+            return ResponseEntity.status(201).body(servername + filename);
         }catch (Exception e){
-            return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body("");
+            return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(e.getMessage());
         }
     }
     @Operation(summary = "Get an image")
     @GetMapping("/{fileName:.+}")
     public ResponseEntity<?> readDetailFile(@PathVariable String fileName){
         try {
-            CompletableFuture<byte[]> file = fileStorageService.readFileContent(fileName);
-            return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(file.get());
+            byte[] file = fileStorageService.readFileContent(fileName);
+            return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(file);
         }catch (Exception e){
             return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(e.getMessage());
         }

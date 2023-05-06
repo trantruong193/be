@@ -1,5 +1,5 @@
 package com.shopme.be.user;
 
 public enum Role {
-    USER,ADMIN
+    ROLE_USER,ROLE_ADMIN,ROLE_EMPLOYEE
 }
