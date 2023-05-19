@@ -16,15 +16,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.Optional;
 
 @RestController
-@CrossOrigin
 @RequestMapping("api/v1/students")
 @RequiredArgsConstructor
 public class StudentController {
+
     private final StudentService studentService;
     private final KlassRepository klassRepository;
+
     @GetMapping()
     ResponseEntity<ResponseObject> getAllByPage(@PageableDefault(size = 10) Pageable pageable) {
         Page<StudentDto> students = studentService.getAll(pageable);
@@ -36,7 +38,7 @@ public class StudentController {
         return ResponseEntity.status(200).body(new ResponseObject("Ok","Student with Id: " + id,studentDto));
     }
     @PostMapping()
-    ResponseEntity<ResponseObject> save(@RequestBody StudentDto studentDto){
+    ResponseEntity<ResponseObject> save(@Valid @RequestBody StudentDto studentDto){
         StudentDto student = studentService.add(studentDto);
         return ResponseEntity
             .status(HttpStatus.OK)
@@ -50,7 +52,7 @@ public class StudentController {
             .body(new ResponseObject("Delete Ok","Delete success student with ID: " + id,""));
     }
     @PutMapping("")
-    ResponseEntity<ResponseObject> update(@RequestBody StudentDto studentDto){
+    ResponseEntity<ResponseObject> update(@Valid @RequestBody StudentDto studentDto){
         StudentDto saved = studentService.update(studentDto);
         return ResponseEntity
             .status(HttpStatus.OK)

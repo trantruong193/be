@@ -1,13 +1,11 @@
 package com.shopme.be.config;
 
-import com.shopme.be.user.MyUserDetail;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
@@ -36,6 +34,7 @@ public class JwtService {
     }
 
     public String generateToken(Map<String,Object> extraClaims , String email){
+
         return Jwts.builder()
                 .setClaims(extraClaims)
                 .setSubject(email)

@@ -33,7 +33,6 @@ public class UserServiceImpl implements UserService {
         return UserMapper.toDto(user.get());
     }
     @Override
-    @Transactional
     public UserDto save(User user) {
         Optional<User> checkEmail = userRepository.findByEmail(user.getEmail());
         if (checkEmail.isPresent()){
@@ -48,45 +47,37 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = MyException.class)
     public UserDto update(UserDto userDto) {
-        // check user is existed
-        Optional<User> founded = userRepository.findById(userDto.getId());
-        if (founded.isEmpty()){
-            throw new MyException(ErrorCode.INVALID_INFORMATION);
-        }
-        // update new info
-        User user = founded.get();
-        if (userDto.getFirstname() != null && userDto.getFirstname() != ""){
-            user.setFirstname(userDto.getFirstname());
-        }
-        if (userDto.getLastname() != null && userDto.getLastname() != ""){
-            user.setLastname(userDto.getLastname());
-        }
-        if (userDto.getNickname() != null && userDto.getNickname() != ""){
-            user.setNickname(userDto.getNickname());
-        }
-        if (userDto.getAddress() != null && userDto.getAddress() != ""){
-            user.setAddress(userDto.getAddress());
-        }
-        if (userDto.getBirthday() != null){
-            user.setBirthday(userDto.getBirthday());
-        }
-        if (userDto.getGender() != null && userDto.getGender() != ""){
-            user.setGender(userDto.getGender());
-        }
-        if (userDto.getAvatar() != null && userDto.getAvatar() != ""){
-            user.setAvatar(userDto.getAvatar());
-        }
-        if (userDto.isTick())
-            user.setTick(true);
-        // return
         try {
-            User newInfo =  userRepository.save(user);
-            return UserMapper.toDto(newInfo);
+            // check user is existed
+            Optional<User> founded = userRepository.findById(userDto.getId());
+            if (founded.isEmpty()){
+                throw new MyException(ErrorCode.INVALID_INFORMATION);
+            }
+            // update new info
+            User user = founded.get();
+            user.setFirstname(userDto.getFirstname());
+            user.setLastname(userDto.getLastname());
+            if (userDto.getNickname() != null && !userDto.getNickname().equals("")){
+                user.setNickname(userDto.getNickname());
+            }
+            user.setAddress(userDto.getAddress());
+            if (userDto.getBirthday() != null){
+                user.setBirthday(userDto.getBirthday());
+            }
+            if (userDto.getGender() != null && !userDto.getGender().equals("")){
+                user.setGender(userDto.getGender());
+            }
+            if (userDto.getAvatar() != null && !userDto.getAvatar().equals("")){
+                user.setAvatar(userDto.getAvatar());
+            }
+            if (userDto.isTick())
+                user.setTick(true);
+            // return
+            return UserMapper.toDto(user);
         }catch (Exception e){
             throw new MyException(ErrorCode.SERVER_ERROR);
         }
-
     }
 }

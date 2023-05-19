@@ -27,39 +27,32 @@ public class StudentServiceImpl implements StudentService {
     private final StudentRepository studentRepository;
     private final KlassRepository klassRepository;
     @Override
-    @Transactional
     public StudentDto add(StudentDto studentDto) {
         // check if email has been used
-        log.info("Start {}",Thread.currentThread().getName());
         Optional<Student> checkEmail = studentRepository.findStudentByEmail(studentDto.getEmail());
         if (checkEmail.isPresent()){
             throw new MyException(ErrorCode.DUPLICATE_EMAIL);
         }
         // creat new student
+        Student newStudent = Student.builder()
+                .firstname(studentDto.getFirstname())
+                .lastname(studentDto.getLastname())
+                .gender(studentDto.getGender())
+                .email(studentDto.getEmail())
+                .birthday(studentDto.getBirthday())
+                .avatar(studentDto.getAvatar())
+                .status(true)
+                .build();
+        // set klass if exist
+        checkKlass(studentDto, newStudent);
+        // set hobbies if exist
+        if (studentDto.getHobbies() != null && studentDto.getHobbies().length != 0)
+            newStudent.setHobbies(Arrays.toString(studentDto.getHobbies()));
         try {
-            Student newStudent = Student.builder()
-                    .firstname(studentDto.getFirstname())
-                    .lastname(studentDto.getLastname())
-                    .gender(studentDto.getGender())
-                    .email(studentDto.getEmail())
-                    .birthday(studentDto.getBirthday())
-                    .avatar(studentDto.getAvatar())
-                    .status(true)
-                    .build();
-            if (studentDto.getKlass().getId() != null){
-                Optional<Klass> klass = klassRepository.findById(studentDto.getKlass().getId());
-                if (klass.isEmpty()){
-                    throw new MyException(ErrorCode.INVALID_INFORMATION);
-                }
-                newStudent.setKlass(klass.get());
-            }
-            if (studentDto.getHobbies() != null && studentDto.getHobbies().length != 0)
-                newStudent.setHobbies(Arrays.toString(studentDto.getHobbies()));
-
+            // save to database
             Student saved = studentRepository.save(newStudent);
             log.info("Create new student {}", newStudent);
             return StudentMapper.toDto(saved);
-
         }catch (Exception e){
             throw new MyException(ErrorCode.SERVER_ERROR);
         }
@@ -77,13 +70,10 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public StudentDto findById(Long id) {
-        long start = System.currentTimeMillis();
         Optional<Student> student = studentRepository.findById(id);
         if (student.isEmpty()){
             throw new MyException(ErrorCode.INVALID_INFORMATION);
         }
-        long end = System.currentTimeMillis();
-        log.info(String.format("%1$s Get students detail in %2$s ms",Thread.currentThread().getName(),end-start));
         return StudentMapper.toDto(student.get());
     }
 
@@ -97,35 +87,31 @@ public class StudentServiceImpl implements StudentService {
         }
         // get student and set new info
         Student found = find.get();
+        found.setFirstname(studentDto.getFirstname());
+        found.setLastname(studentDto.getLastname());
+        found.setBirthday(studentDto.getBirthday());
+        found.setGender(studentDto.getGender());
+        // set klass if exist
+        checkKlass(studentDto, found);
+        // set hobbies if exist
+        if (studentDto.getHobbies() != null && studentDto.getHobbies().length>0)
+            found.setHobbies(Arrays.toString(studentDto.getHobbies()));
+        // set avatar if exist
+        if (!studentDto.getAvatar().isEmpty())
+            found.setAvatar(studentDto.getAvatar());
+        // set status
+        found.setStatus(studentDto.isStatus());
 
-        if (!studentDto.getFirstname().isEmpty() && studentDto.getFirstname() != null)
-            found.setFirstname(studentDto.getFirstname());
-        if (!studentDto.getLastname().isEmpty() && studentDto.getLastname() != null)
-            found.setLastname(studentDto.getLastname());
-        if (studentDto.getBirthday() != null)
-            found.setBirthday(studentDto.getBirthday());
-        if (!studentDto.getGender().isEmpty() && studentDto.getGender() != null)
-            found.setGender(studentDto.getGender());
+        return StudentMapper.toDto(found);
+    }
 
-        if (studentDto.getKlass().getId() != null){
+    private void checkKlass(StudentDto studentDto, Student found) {
+        if (studentDto.getKlass() != null && studentDto.getKlass().getId() != null){
             Optional<Klass> klass = klassRepository.findById(studentDto.getKlass().getId());
             if (klass.isEmpty()){
                 throw new MyException(ErrorCode.INVALID_INFORMATION);
             }
             found.setKlass(klass.get());
-        }
-        if (studentDto.getHobbies() != null && studentDto.getHobbies().length>0)
-            found.setHobbies(Arrays.toString(studentDto.getHobbies()));
-        if (!studentDto.getAvatar().isEmpty() && studentDto.getAvatar() != null)
-            found.setAvatar(studentDto.getAvatar());
-        found.setStatus(studentDto.isStatus());
-
-        try {
-            Student saved =  studentRepository.save(found);
-            log.info("Update student {}",saved);
-            return StudentMapper.toDto(saved);
-        }catch (Exception e){
-            throw new MyException(ErrorCode.SERVER_ERROR);
         }
     }
 
@@ -144,8 +130,7 @@ public class StudentServiceImpl implements StudentService {
     public Page<StudentDto> getAll(Pageable pageable) {
         long start = System.currentTimeMillis();
         Page<Student> students = studentRepository.findAll(pageable);
-        long end = System.currentTimeMillis();
-        log.info(String.format("%1$s Get all students in %2$s ms",Thread.currentThread().getName(),end-start));
+        log.info("Get students in: {}ms",System.currentTimeMillis()-start);
         return students.map(StudentMapper::toDto);
     }
 

@@ -1,13 +1,12 @@
 package com.shopme.be.exception;
 
 import lombok.Data;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.EqualsAndHashCode;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 public class MyException extends RuntimeException{
     private ErrorObject errorObject;
-    @Autowired
-    ErrorLoader errorLoader;
 
     public MyException(String errorCode) {
         super(errorCode);

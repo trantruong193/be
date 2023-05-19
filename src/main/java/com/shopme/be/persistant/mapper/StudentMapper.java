@@ -21,11 +21,10 @@ public class StudentMapper {
         }
         if (entity.getHobbies() != null){
             int length = entity.getHobbies().length();
-            result.setHobbies(entity.getHobbies().substring(1,length-1).replace(" ","").split(","));
+            result.setHobbies(entity.getHobbies().substring(1,length-1).replace(", ",",").split(","));
         }else {
             result.setHobbies(new String[0]);
         }
-
         return result;
     }
 }
